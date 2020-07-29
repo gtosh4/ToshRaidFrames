@@ -1,0 +1,15 @@
+## Interface: 80300
+## X-WoW-Project: retail
+## Title: ToshUnitFramesOptions
+## Author: Tosh
+## Version: 1
+## Notes: 
+## DefaultState: enabled
+## LoadOnDemand: 1
+## Dependencies: ToshUnitFrames
+
+embeds.xml
+
+core.lua
+
+widgets/main.lua

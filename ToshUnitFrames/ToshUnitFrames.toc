@@ -1,0 +1,15 @@
+## Interface: 80300
+## Title: ToshUnitFrames
+## Author: Tosh
+## Version: 1.0.0
+## Notes: 
+## X-Category: Unit Frames
+## X-WoW-Project: retail
+## DefaultState: enabled
+## LoadOnDemand: 0
+## SavedVariables: ToshUnitFramesDB
+## OptionalDeps: Ace3, LibCompress, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets
+
+embeds.xml
+
+core.lua
