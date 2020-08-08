@@ -7,9 +7,21 @@
 ## DefaultState: enabled
 ## LoadOnDemand: 1
 ## Dependencies: ToshUnitFrames
+## OptionalDeps: AceGUI-3.0-SharedMediaWidgets, LibDualSpec-1.0
 
 embeds.xml
 
-core.lua
+options.lua
+
+widgets/helpers.lua
 
 widgets/main.lua
+widgets/profiles.lua
+widgets/region_config.lua
+widgets/region_unit_single.lua
+widgets/region_unit_group.lua
+widgets/region_bar.lua
+widgets/region_dynamic.lua
+widgets/region_icon.lua
+widgets/region_static.lua
+widgets/region_texture.lua

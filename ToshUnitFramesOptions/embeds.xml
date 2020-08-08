@@ -2,7 +2,6 @@
 ..\FrameXML\UI.xsd">
   <Include file="libs\AceComm-3.0\AceComm-3.0.xml"/>
   <Include file="libs\AceGUI-3.0\AceGUI-3.0.xml"/>
-  <Include file="libs\AceGUI-3.0-Search-EditBox\AceGUI-3.0-Search-EditBox.xml"/>
   <Include file="libs\AceGUI-3.0-SharedMediaWidgets\widget.xml"/>
   <Include file="libs\LibDeflate\lib.xml"/>
   <Include file="libs\LibSerialize-1.0.0\lib.xml"/>

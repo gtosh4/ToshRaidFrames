@@ -8,8 +8,28 @@
 ## DefaultState: enabled
 ## LoadOnDemand: 0
 ## SavedVariables: ToshUnitFramesDB
-## OptionalDeps: Ace3, LibCompress, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets
+## OptionalDeps: Ace3, LibSharedMedia-3.0, LibSpellRange-1.0, Clique
 
 embeds.xml
 
-core.lua
+init.lua
+regions.lua
+element.lua
+frames.lua
+
+# Basic types
+region_types/base_region.lua
+region_types/base_container.lua
+
+# Unit types
+region_types/unit_single.lua
+region_types/unit_group.lua
+
+# Other containers
+region_types/static.lua
+region_types/dynamic.lua
+
+# Data types
+region_types/texture.lua
+region_types/icon.lua
+region_types/bar.lua

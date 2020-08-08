@@ -1,3 +1,5 @@
+local _, ns = ...
+
 local AceGUI = LibStub("AceGUI-3.0")
 
 -- Lua APIs
@@ -45,6 +47,25 @@ do
 		AceGUI:ClearFocus()
 	end
 
+	local function updateOptions(frame)
+		local opts = ToshUnitFrames.db.global.options
+		if not opts then
+			opts = {}
+			ToshUnitFrames.db.global.options = opts
+		end
+		opts.width = frame:GetWidth()
+		opts.height = frame:GetHeight()
+		if frame:GetNumPoints() > 0 then
+			local pt = {frame:GetPoint(1)}
+			opts.pos = {
+				from=pt[1],
+				to=pt[3],
+				x=pt[4],
+				y=pt[5],
+			}
+		end
+	end
+
 	local function frameOnMouseUp(this)
 		local frame = this:GetParent()
 		frame:StopMovingOrSizing()
@@ -54,6 +75,7 @@ do
 		status.height = frame:GetHeight()
 		status.top = frame:GetTop()
 		status.left = frame:GetLeft()
+		updateOptions(frame)
 	end
 
 	local function sizerseOnMouseDown(this)
@@ -61,18 +83,9 @@ do
 		AceGUI:ClearFocus()
 	end
 
-	local function sizersOnMouseDown(this)
-		this:GetParent():StartSizing("BOTTOM")
-		AceGUI:ClearFocus()
-	end
-
-	local function sizereOnMouseDown(this)
-		this:GetParent():StartSizing("RIGHT")
-		AceGUI:ClearFocus()
-	end
-
 	local function sizerOnMouseUp(this)
 		this:GetParent():StopMovingOrSizing()
+		updateOptions(this:GetParent())
 	end
 
 	local function SetTitle(self,title)
@@ -150,39 +163,38 @@ do
 	local function EnableResize(self, state)
 		local func = state and "Show" or "Hide"
 		self.sizer_se[func](self.sizer_se)
-    end
-    
-    -- Borrowed from WeakAurasOptions
-    local function CreateDecoration(frame, width)
-        local deco1 = frame:CreateTexture(nil, "BACKGROUND")
-        deco1:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
-        deco1:SetTexCoord(0.31, 0.67, 0, 0.63)
-        deco1:SetSize(width, 40)
-      
-        local deco2 = frame:CreateTexture(nil, "BACKGROUND")
-        deco2:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
-        deco2:SetTexCoord(0.21, 0.31, 0, 0.63)
-        deco2:SetPoint("RIGHT", deco1, "LEFT")
-        deco2:SetSize(30, 40)
-        deco1.decoLeft = deco2
-      
-        local deco3 = frame:CreateTexture(nil, "BACKGROUND")
-        deco3:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
-        deco3:SetTexCoord(0.67, 0.77, 0, 0.63)
-        deco3:SetPoint("LEFT", deco1, "RIGHT")
-        deco3:SetSize(30, 40)
-        deco1.decoRight = deco3
-      
-        return deco1
-      end
+	end
+	
+	local function CreateDecoration(frame)
+		local bg = frame:CreateTexture(nil, "OVERLAY")
+		bg:SetTexture(131080) -- Interface\\DialogFrame\\UI-DialogBox-Header
+		bg:SetTexCoord(0.31, 0.69, 0, 0.63)
+		bg:SetHeight(40)
+		bg:SetPoint("LEFT", frame)
+		bg:SetPoint("RIGHT", frame)
+	  
+		local bgL = frame:CreateTexture(nil, "OVERLAY")
+		bgL:SetTexture(131080) -- Interface\\DialogFrame\\UI-DialogBox-Header
+		bgL:SetTexCoord(0.21, 0.31, 0, 0.63)
+		bgL:SetPoint("RIGHT", bg, "LEFT")
+		bgL:SetSize(30, 40)
+	
+		local bgR = frame:CreateTexture(nil, "OVERLAY")
+		bgR:SetTexture(131080) -- Interface\\DialogFrame\\UI-DialogBox-Header
+		bgR:SetTexCoord(0.69, 0.79, 0, 0.63)
+		bgR:SetPoint("LEFT", bg, "RIGHT")
+		bgR:SetSize(30, 40)
+	  
+		return bg
+	end
 
-    local function Constructor()
-        if _G["ToshUnitFramesOptions"] then
+    function ns:CreateRootWidget()
+        if _G["ToshUnitFramesOptions"] then -- only one instance allowed
             return _G["ToshUnitFramesOptions"].obj
         end
 
-        local backdropTemplate = select(4, GetBuildInfo()) > 90000 and "BackdropTemplate"
-		local frame = CreateFrame("Frame", "ToshUnitFramesOptions", UIParent, backdropTemplate)
+		local frame = CreateFrame("Frame", "ToshUnitFramesOptions", UIParent, ns.backdropTemplate)
+		frame:SetFrameStrata("FULLSCREEN_DIALOG")
         tinsert(UISpecialFrames, frame:GetName())
 
 		local self = {}
@@ -204,13 +216,19 @@ do
 
 		self.frame = frame
 		frame.obj = self
-		frame:SetWidth(700)
-		frame:SetHeight(500)
-		frame:SetPoint("CENTER",UIParent,"CENTER",0,0)
+
+		local opts = ToshUnitFrames.db.global.options or {}
+		frame:SetWidth(opts.width or 700)
+		frame:SetHeight(opts.height or 500)
+		local pos = opts.pos or {}
+		frame:SetPoint(pos.from or "CENTER", UIParent, pos.to or "CENTER", pos.x or 0, pos.y or 0)
+		ToshUnitFrames:Debug(opts, "options frame")
+
 		frame:EnableMouse()
+		frame:SetClampedToScreen(true)
 		frame:SetMovable(true)
 		frame:SetResizable(true)
-		frame:SetFrameStrata("FULLSCREEN_DIALOG")
+		frame:SetFrameStrata("DIALOG")
 		frame:SetScript("OnMouseDown", frameOnMouseDown)
 
 		frame:SetScript("OnShow",frameOnShow)
@@ -225,28 +243,33 @@ do
             edgeSize = 32,
             insets = { left = 8, right = 8, top = 8, bottom = 8 }
         })
-        frame:SetBackdropColor(0, 0, 0, 1)
+		frame:SetBackdropColor(0, 0, 0, 1)
+		
 
-		local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
-		close:SetPoint("TOPRIGHT", -4, -4)
+		local closebg = CreateFrame("Frame", nil, frame)
+		closebg:SetPoint("TOPRIGHT", -12, 12)
+		closebg:SetSize(5, 40)
+		CreateDecoration(closebg)
+
+		local close = CreateFrame("Button", nil, closebg, "UIPanelCloseButton")
+		close:SetPoint("CENTER")
 		close:SetScript("OnClick", closeOnClick)
 		self.closebutton = close
 		close.obj = self
 
-        local title = CreateFrame("Button", nil, frame)
+		local title = CreateFrame("Button", nil, frame)
         title:SetPoint("TOP", 0, 12)
-        title:SetSize(120, 40)
+		title:SetSize(100, 40)
         title:SetNormalFontObject(GameFontNormal)
         title:SetPushedTextOffset(0,0)
 		title:EnableMouse()
 		title:SetScript("OnMouseDown",titleOnMouseDown)
-        title:SetScript("OnMouseUp", frameOnMouseUp)
+		title:SetScript("OnMouseUp", frameOnMouseUp)
+		title:SetText("Tosh UF " .. ToshUnitFrames.versionString)
         self.title = title
         
-        local titlebg = CreateDecoration(title, 100)
-        titlebg:SetPoint("BOTTOMLEFT", title)
-        titlebg:SetPoint("TOPRIGHT", title)
-        title:SetNormalTexture(titlebg)
+		local titlebg = CreateDecoration(title)
+		title:SetNormalTexture(titlebg)
 
 		local sizer_se = CreateFrame("BUTTON",nil,frame)
 		sizer_se:SetPoint("BOTTOMRIGHT",frame,"BOTTOMRIGHT",0,0)
@@ -278,12 +301,14 @@ do
 		local content = CreateFrame("Frame",nil,frame)
 		self.content = content
 		content.obj = self
-		content:SetPoint("TOPLEFT",frame,"TOPLEFT",12,-32)
-		content:SetPoint("BOTTOMRIGHT",frame,"BOTTOMRIGHT",-12,13)
+		content:SetPoint("TOPLEFT",frame,"TOPLEFT",12,-18)
+		content:SetPoint("BOTTOMRIGHT",frame,"BOTTOMRIGHT",-12,12)
 
 		AceGUI:RegisterAsContainer(self)
+
+		self:SetLayout("Fill")
+		self:Hide()
+
 		return self
 	end
-
-	AceGUI:RegisterWidgetType(Type,Constructor,Version)
 end

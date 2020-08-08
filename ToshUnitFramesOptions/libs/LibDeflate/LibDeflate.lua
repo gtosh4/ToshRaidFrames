@@ -76,8 +76,8 @@ licenses shall be comply when used.
 --[[
 	Curseforge auto-packaging replacements:
 
-	Project Date: 2020-06-26T15:11:26Z
-	Project Hash: c19f978f053ebd22950eb6f1df4445677a4b0160
+	Project Date: 2020-06-26T09:22:05Z
+	Project Hash: 6831edcaa915154e7769d622e0de72ee5d25a882
 	Project Version: 1.0.2-release
 --]]
 
